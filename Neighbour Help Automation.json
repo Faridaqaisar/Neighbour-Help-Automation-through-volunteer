@@ -1,0 +1,1097 @@
+{
+  "name": "Neighbour Help Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1KjSv0Xsl8RcwQPM_zZfM34zjXp3vncptNYYy1hlPxjM",
+          "mode": "list",
+          "cachedResultName": "Copy of Neighbour Help System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KjSv0Xsl8RcwQPM_zZfM34zjXp3vncptNYYy1hlPxjM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1274074042,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KjSv0Xsl8RcwQPM_zZfM34zjXp3vncptNYYy1hlPxjM/edit#gid=1274074042"
+        },
+        "event": "rowUpdate",
+        "options": {}
+      },
+      "id": "82da9286-61c6-4f40-8e93-40dcd3aeb4ce",
+      "name": "New Request Added",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -3328,
+        432
+      ],
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "fG3vIWvhHt41HMuK",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "volunteersDocumentId",
+              "value": "<__PLACEHOLDER_VALUE__Google Sheets Document ID for Volunteer Table__>",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "volunteersSheetName",
+              "value": "<__PLACEHOLDER_VALUE__Volunteer Table Sheet Name__>",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "requestersDocumentId",
+              "value": "<__PLACEHOLDER_VALUE__Google Sheets Document ID for Requester Table__>",
+              "type": "string"
+            },
+            {
+              "id": "id-4",
+              "name": "requestersSheetName",
+              "value": "<__PLACEHOLDER_VALUE__Requester Table Sheet Name__>",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "fromEmail",
+              "value": "<__PLACEHOLDER_VALUE__Sender Email Address__>",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "9810d4d7-f481-44cf-b882-337a2bbeccfa",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3104,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "GPT-3.5-TURBO"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are part of a neighbourhood help system.\nCategorize the requester’s message into:\n1. Work Category → (Groceries, Medical, Errands, Transportation, Other)\n2. Urgency → (Urgent, Medium, Normal)\n\nExample:\nInput: \"I need help getting my medicine today.\"\nOutput: \nWork Category: Medical\nUrgency: Urgent\n\nNow analyze this request:\n{{$json[\"Request Description\"]}}\n\nReturn only this JSON structure:\n{\n  \"Work Category\": \"...\",\n  \"Urgency\": \"...\",\n  \"AI_Message\": \"Thank you for reaching out. We’ve categorized your request as {{Work Category}} with {{Urgency}} priority. A volunteer will contact you soon.\"\n}\n"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "51d2565f-dfaf-4692-8d55-a32596f601d1",
+      "name": "Categorize Request with AI",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        -2880,
+        432
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "vXwRu8HSZ14y9syB",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "aiCategory",
+              "value": "={{ JSON.parse($json.output[0].content[0].text)['Work Category'] }}",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "aiUrgency",
+              "value": "={{ JSON.parse($json.output[0].content[0].text).Urgency }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "9beb6b67-74d4-4b70-a333-51c6d7c727e8",
+      "name": "Parse AI Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2528,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34",
+          "mode": "list",
+          "cachedResultName": "Neighbour Help System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1274074042,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34/edit#gid=1274074042"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "1",
+            "Request Category": "=Groceries",
+            "Name": "Ali Hussain",
+            "Email": "ali@gmail.com",
+            "Request Description": "I need groceries for the week.",
+            "Status": "New"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Request Description",
+              "displayName": "Request Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Request Category",
+              "displayName": "Request Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Assigned Volunteer",
+              "displayName": "Assigned Volunteer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "06613735-bc40-4f45-ada0-2fb644f771d7",
+      "name": "Update Requester Row with AI Data",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2304,
+        432
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JO6FZFCiQI6BLqGG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34",
+          "mode": "list",
+          "cachedResultName": "Neighbour Help System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "d3a07f28-d1a8-445b-a179-34cdb8a81d62",
+      "name": "Get Available Volunteers",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2080,
+        432
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JO6FZFCiQI6BLqGG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const request = $input.first().json;\nconst volunteers = $input.all();\n\n// Find first volunteer matching the category\nconst matchedVolunteer = volunteers.find(v => v.json.Work_Category === request.aiCategory);\n\nif (matchedVolunteer) {\n  return [\n    {\n      json: {\n        volunteerFound: true,\n        volunteerID: matchedVolunteer.json.ID,\n        volunteerName: matchedVolunteer.json.Name,\n        volunteerEmail: matchedVolunteer.json.Email,\n        volunteerCategory: matchedVolunteer.json.Work_Category,\n        requestID: request.ID,\n        requesterName: request.Name,\n        requesterEmail: request.Email,\n        requestCategory: request.aiCategory,\n        urgency: request.aiUrgency,\n        requestDescription: request[\"Request Description\"]\n      }\n    }\n  ];\n} else {\n  return [\n    {\n      json: {\n        volunteerFound: false,\n        requestID: request.ID,\n        requesterName: request.Name,\n        requesterEmail: request.Email,\n        requestCategory: request.aiCategory,\n        urgency: request.aiUrgency,\n        requestDescription: request[\"Request Description\"]\n      }\n    }\n  ];\n}\n"
+      },
+      "id": "5f15c13f-7bcd-458c-8d00-90fa15dcf117",
+      "name": "Match Volunteer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1856,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "id-1",
+              "leftValue": "={{ $json.volunteerFound }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "15b05c36-e1af-4083-97a4-6a707d84a891",
+      "name": "Volunteer Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1632,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34",
+          "mode": "list",
+          "cachedResultName": "Neighbour Help System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "1",
+            "Availability": "Available",
+            "Status": "Assigned",
+            "Name": "Ahmed Khan",
+            "Email": "ahmed@gmail.com",
+            "Type of Work": "Groceries"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Work Category",
+              "displayName": "Work Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Availability",
+              "displayName": "Availability",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Type of Work",
+              "displayName": "Type of Work",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "889ceb9a-03a7-4572-a718-78d4419a674f",
+      "name": "Update Volunteer Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1408,
+        336
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JO6FZFCiQI6BLqGG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34",
+          "mode": "list",
+          "cachedResultName": "Neighbour Help System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1274074042,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34/edit#gid=1274074042"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "1",
+            "Status": "Assigned",
+            "Name": "Ali Hussain",
+            "Email": "ali@gmail.com",
+            "Request Description": "I need groceries for the week.",
+            "Request Category": "Groceries",
+            "Urgency": "urgent"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Request Description",
+              "displayName": "Request Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Request Category",
+              "displayName": "Request Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Urgency",
+              "displayName": "Urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Assigned Volunteer",
+              "displayName": "Assigned Volunteer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "5aebaed1-aad6-47ec-a144-7e067f03f2d0",
+      "name": "Update Requester with Volunteer Info",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1184,
+        336
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JO6FZFCiQI6BLqGG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "farida.aimlengineer.pk@gmail.com",
+        "toEmail": "={{ $json.Email }}",
+        "subject": "Your Request Has Been Assigned",
+        "emailFormat": "text",
+        "text": "Dear Ali Huaaain\n\nYour request has been assigned to {{ $json.volunteerName }}. They will assist you soon.\n\nRequest: {{ $json.requestDescription }}\nCategory: {{ $json.requestCategory }}\nUrgency: {{ $json.urgency }}\n\nVolunteer Contact: {{ $json.volunteerEmail }}\n\nThank you for using our Neighbour Help service.\n\nBest regards,\nNeighbour Help Team",
+        "options": {}
+      },
+      "id": "6ea252d8-ae23-410f-b553-5e407a56145b",
+      "name": "Email to Requester",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -960,
+        240
+      ],
+      "webhookId": "d2655f55-6e49-4848-97ed-418f0ea20841",
+      "credentials": {
+        "smtp": {
+          "id": "im4ygj3SVoHhdk5o",
+          "name": "SMTP account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "farida.aimlengineer.pk@gmail,com",
+        "toEmail": "=ahmed@gmail.com",
+        "subject": "New Assignment: Help Request",
+        "emailFormat": "text",
+        "text": "Dear \n\nYou have a new assignment:\n\nRequest: {{ $json.requestDescription }}\nCategory: {{ $json.requestCategory }}\nUrgency: {{ $json.urgency }}\n\nRequester: {{ $json.requesterName }}\nContact: {{ $json.requesterEmail }}\n\nPlease contact them as soon as possible.\n\nThank you for volunteering!\n\nBest regards,\nNeighbour Help Team",
+        "options": {}
+      },
+      "id": "70ac0d3b-1dcc-4d05-9d8a-8826bd1f80df",
+      "name": "Email to Volunteer",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -960,
+        432
+      ],
+      "webhookId": "051359ac-39e9-46e9-9bfd-ab9e50482513",
+      "credentials": {
+        "smtp": {
+          "id": "2mU4NQ3wOCCpm23l",
+          "name": "SMTP account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "farida.aimlengineer.pk@gmail.com",
+        "toEmail": "={{ $json.requesterEmail }}",
+        "subject": "No Volunteer Available",
+        "emailFormat": "text",
+        "text": "=Dear {{ $json.requesterName }},\n\nWe apologize, but currently there are no available volunteers matching your request category ({{ $json.requestCategory }}).\n\nWe will notify you as soon as a volunteer becomes available.\n\nRequest: {{ $json.requestDescription }}\nUrgency: {{ $json.urgency }}\n\nThank you for your patience.\n\nBest regards,\nNeighbour Help Team",
+        "options": {}
+      },
+      "id": "911b1abe-490b-4588-8ef3-1ba948a7f112",
+      "name": "No Volunteer Available Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -1408,
+        528
+      ],
+      "webhookId": "b42252e7-1351-405f-8bcb-5122ab3b1b97",
+      "credentials": {
+        "smtp": {
+          "id": "O32JLqj01t6NUaJC",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34",
+          "mode": "list",
+          "cachedResultName": "Neighbour Help System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34/edit#gid=0"
+        },
+        "event": "rowUpdate",
+        "options": {
+          "columnsToWatch": [
+            "Status"
+          ]
+        }
+      },
+      "id": "97622cd6-ff56-4e23-8fab-cc36c4a5a57a",
+      "name": "Task Completed Trigger",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -3328,
+        848
+      ],
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "fG3vIWvhHt41HMuK",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34",
+          "mode": "list",
+          "cachedResultName": "Neighbour Help System",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1DT_P1rxITVzlTDwOeNyoRDqkmnwX9WyY9ED2lMStZ34/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $json.Email }}",
+            "Availability": "={{ $json.Availability }}",
+            "Status": "={{ $json.Status }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Work Category",
+              "displayName": "Work Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Availability",
+              "displayName": "Availability",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Type of Work",
+              "displayName": "Type of Work",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "37e83e19-f2c4-4c37-8d5a-63cc13b14008",
+      "name": "Reset Volunteer Availability",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -3104,
+        848
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JO6FZFCiQI6BLqGG",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "farida.aimlengineer.pk@gmail.com",
+        "toEmail": "={{ $json.Email }}",
+        "subject": "Task Completed - Thank You",
+        "emailFormat": "text",
+        "text": "=Dear {{ $json.requesterName }},\n\nWe’re happy to inform you that your request has been successfully completed!\n\n📝 Request Details:\n• Description: {{ $json.requestDescription }}\n• Category: {{ $json.requestCategory }}\n• Urgency: {{ $json.urgency }}\n\nYour assigned volunteer, {{ $json.volunteerName }}, has marked the task as completed.\n\nThank you for using the Neighbour Help System. We hope you are satisfied with the support provided.\n\nBest regards,  \nNeighbour Help Team\n",
+        "options": {}
+      },
+      "id": "dca0b70f-3b51-42b9-873d-d8c51a4bfaf7",
+      "name": "Completion Email to Requester",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -2880,
+        752
+      ],
+      "webhookId": "42ef9db4-b9ae-47e1-aaa6-3f1e9465a0fd",
+      "credentials": {
+        "smtp": {
+          "id": "wgps56LRMRB2g1ga",
+          "name": "SMTP account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "farida.aimlengineer.pk@gmail.com",
+        "toEmail": "={{ $json.Email }}",
+        "subject": "Task Completed - Thank You for Volunteering",
+        "emailFormat": "text",
+        "text": "=Dear {{ $json.volunteerName }},\n\nThank you for completing your assigned task!\n\n📝 Task Details:\n• Request: {{ $json.requestDescription }}\n• Category: {{ $json.requestCategory }}\n• Urgency: {{ $json.urgency }}\n• Requester: {{ $json.requesterName }} ({{ $json.requesterEmail }})\n\nYour status has been reset to Available. You may now receive new assignments from the Neighbour Help System.\n\nWe truly appreciate your time, effort, and kindness.\n\nWarm regards,  \nNeighbour Help Team\n",
+        "options": {}
+      },
+      "id": "b6cca92d-fd6a-42ea-8c6a-3b3b3f4d501b",
+      "name": "Completion Email to Volunteer",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -2880,
+        944
+      ],
+      "webhookId": "6f53736a-5ee7-4ecd-ad7f-bfbf8b91e0f7",
+      "credentials": {
+        "smtp": {
+          "id": "tySVKu4W0u47moBs",
+          "name": "SMTP account 7"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "New Request Added": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Categorize Request with AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Categorize Request with AI": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Response": {
+      "main": [
+        [
+          {
+            "node": "Update Requester Row with AI Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Requester Row with AI Data": {
+      "main": [
+        [
+          {
+            "node": "Get Available Volunteers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Available Volunteers": {
+      "main": [
+        [
+          {
+            "node": "Match Volunteer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Match Volunteer": {
+      "main": [
+        [
+          {
+            "node": "Volunteer Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Volunteer Found?": {
+      "main": [
+        [
+          {
+            "node": "Update Volunteer Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Volunteer Available Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Volunteer Status": {
+      "main": [
+        [
+          {
+            "node": "Update Requester with Volunteer Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Requester with Volunteer Info": {
+      "main": [
+        [
+          {
+            "node": "Email to Requester",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email to Volunteer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Task Completed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Reset Volunteer Availability",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reset Volunteer Availability": {
+      "main": [
+        [
+          {
+            "node": "Completion Email to Requester",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Completion Email to Volunteer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3372f42b-cfb4-4277-a6a7-976ad3080cc4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0ed8d3ebfbac1ba3757f09329caa47af32ae0297067aa52141aa5b35dc828f9e"
+  },
+  "id": "Y9gPDOm6J8Z60ewm",
+  "tags": []
+}
